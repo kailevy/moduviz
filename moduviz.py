@@ -43,11 +43,12 @@ def am_test(data_fn, time, step, wc):
     step: discrete time sample rate
     wc: carrier frequency
     """
+    fn = np.vectorize(data_fn)
     times = np.arange(0,time,step)
     carrier = np.cos(np.multiply(times,2*np.pi*wc))
-    am = np.multiply(data_fn(times),carrier)
+    am = np.multiply(fn(times),carrier)
 
-    plt.plot(times,data_fn(times))
+    plt.plot(times,fn(times))
     plt.figure()
     plt.plot(times,carrier)
     plt.figure()

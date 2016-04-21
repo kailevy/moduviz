@@ -2,6 +2,11 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+def square(t):
+    freq = 2
+    return 2*(int(freq*t)%2)-1
+
+
 def fm_test(data_fn, step, wc, kf, A, time):
     """
     data_fn: function for data signal
@@ -11,6 +16,7 @@ def fm_test(data_fn, step, wc, kf, A, time):
     A: amplitude of output signal
     time: length of signal
     """
+    fn = np.vectorize(data_fn)
     fm = []
     carrier = []
     integral = [0]
@@ -19,11 +25,11 @@ def fm_test(data_fn, step, wc, kf, A, time):
     carrier = np.sin(np.multiply(times,2*np.pi*wc))
 
     for t in times:
-        integral.append(integral[-1] + step*data_fn(t))
+        integral.append(integral[-1] + step*fn(t))
 
     fm = np.multiply(A,np.cos(np.multiply(np.add(np.multiply(times,wc),np.multiply(integral[1:],kf)),2*np.pi)))
 
-    plt.plot(times,data_fn(times))
+    plt.plot(times,fn(times))
     plt.figure()
     plt.plot(times,carrier)
     plt.figure()

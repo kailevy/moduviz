@@ -30,5 +30,23 @@ def fm_test(data_fn, step, wc, kf, A, time):
     plt.plot(times,fm)
     plt.show()
 
+def am_test(data_fn, time, step, wc):
+    """
+    data_fn: function for data signal (must take array)
+    time: length of signal
+    step: discrete time sample rate
+    wc: carrier frequency
+    """
+    times = np.arange(0,time,step)
+    carrier = np.cos(np.multiply(times,2*np.pi*wc))
+    am = np.multiply(data_fn(times),carrier)
+
+    plt.plot(times,data_fn(times))
+    plt.figure()
+    plt.plot(times,carrier)
+    plt.figure()
+    plt.plot(times,am)
+    plt.show()
+
 if __name__ == '__main__':
     fm_test(np.sin, 0.001, 3, 2, 1, 10)

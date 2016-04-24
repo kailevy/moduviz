@@ -22,8 +22,10 @@ import math
 
 class MainWidget(Widget):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, callback=None, *args, **kwargs):
         super(MainWidget, self).__init__(*args, **kwargs)
+
+        self.callback = callback
 
         x = y = 300
         points = []
@@ -33,8 +35,8 @@ class MainWidget(Widget):
 
         self.add_widget(self.s)
 
-        self.b = Button(text='Hello World', size=[100,100], pos=[self.size[0]-100,0])
-        self.b.bind(on_press=self.click)
+        self.b = Button(text='Submit', size=[100,100], pos=[self.size[0]-100,0])
+        self.b.bind(on_press=self.submit)
         self.add_widget(self.b)
         
         self.dropdown = DropDown()
@@ -51,17 +53,8 @@ class MainWidget(Widget):
         btn.bind(on_release=lambda btn: self.dropdown.select(btn.text))
         self.dropdown.add_widget(btn)
 
-        # create a big main button
         self.mainbutton = Button(text='Choose signal', size_hint=(None, None), size=[100,100], pos=[self.size[0]-100,100])
-
-        # show the dropdown menu when the main button is released
-        # note: all the bind() calls pass the instance of the caller (here, the
-        # mainbutton instance) as the first argument of the callback (here,
-        # dropdown.open.).
         self.mainbutton.bind(on_release=self.dropdown.open)
-
-        # one last thing, listen for the selection in the dropdown list and
-        # assign the data to the button text.
         self.dropdown.bind(on_select=self.dropdown_select)
 
         self.add_widget(self.mainbutton)
@@ -87,23 +80,8 @@ class MainWidget(Widget):
 
         self.s.set_data(data)
 
-    # def on_touch_down(self, touch):
-    #     print(touch)
-    #     self.s.on_touch_down(touch)
-
-    # def on_touch_up(self, touch):
-    #     self.s.on_touch_up(touch)
-
-    # def on_touch_move(self, touch):
-    #     self.s.on_touch_move(touch)
-
-    def click(self, instance):
-        data = []
-        for i in range(1000):
-            data.append(0)
-        self.s.set_data(data)
-
-
+    def submit(self, instance):
+        self.callback(data)
 
 class SignalDraw(Widget):
 
@@ -184,20 +162,12 @@ class SignalDraw(Widget):
 
 class Main(App):
 
+    def __init__(self, callback):
+        super(Main, self.)
+        self.callback = callback
+
     def build(self):
         size = [800,600]
-        x = y = 150
-        l = 100
-        # Pacman !
-        points = []
-        for i in range(50,size[0]-150):
-            # i = radians(i)
-            points.extend([i, y])
-        # w = Widget()
-        # w.add_widget(SignalDraw(points=points))
-        # w.add_widget(Button(text='Hello World'))
-        # return w
-        # return SignalDraw(points=points) 
         return MainWidget(size=size)
 
 if __name__ == '__main__':

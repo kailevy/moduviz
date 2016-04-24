@@ -7,9 +7,11 @@ from kivy.garden.graph import Graph, MeshLinePlot, MeshStemPlot, SmoothLinePlot
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 
+import gui
+
 class BiggerBox(BoxLayout):
-    def __init__(self,w1,w2):
-        super(BiggerBox, self).__init__(orientation='horizontal')
+    def __init__(self,w1,w2,orientation='horizontal'):
+        super(BiggerBox, self).__init__(orientation=orientation)
         self.add_widget(w1)
         self.add_widget(w2)
 
@@ -57,30 +59,38 @@ class Grapher(BoxLayout):
         self.plots[p].points = signal
 
 class Main(App):
-    def __init__(self,Ts,signal):
+    def __init__(self, Ts):
         """
         Ts: sample time step
-        signal: modulation signals
         """
         super(Main, self).__init__()
+        self.interactive = gui.MainWidget(callback=self.visualize, size=[1200,200])
         self.Ts = Ts
-        self.signal = signal
+        self.time = Grapher()
+        self.fourier = Grapher(3,-0.5/self.Ts,0.5/self.Ts, 0, 1, 'Freq')
 
     def build(self):
-        time = Grapher()
-        fourier = Grapher(3,-0.5/self.Ts,0.5/self.Ts, 0, 1, 'Freq')
+        big_box = BiggerBox(self.time,self.fourier,'horizontal')
+        biggest_box = BiggerBox(big_box, self.interactive, 'vertical')
+        return biggest_box
+
+    def modulate(self, signal, mod):
+        if mod:
+            return fm_test(10, self.Ts, 3, 2, 1, signal=signal)
+        else:
+            return am_test(10, self.Ts, 3, signal=signal)
+
+    def visualize(self, signal, mod):
+        """
+        signal: data signal
+        mod: am/fm (fm=1, am=0)
+        """
+        signal = self.modulate(signal, mod)
         for i in range(3):
-            select = [(self.signal[0][x], self.signal[i+1][x]) for x in range(len(self.signal[0]))]
-            time.graph_points(i,select)
-            transform = view_freq(self.signal[i+1], self.Ts)
-            fourier.graph_points(i, [(transform[0][x], transform[1][x]) for x in range(len(transform[0]))])
-
-        return BiggerBox(time,fourier)
-
-
-def square(t):
-    freq = 2
-    return 2*(int(freq*t)%2)-1
+            select = [(signal[0][x], signal[i+1][x]) for x in range(len(signal[0]))]
+            self.time.graph_points(i,select)
+            transform = view_freq(signal[i+1], self.Ts)
+            self.fourier.graph_points(i, [(transform[0][x], transform[1][x]) for x in range(len(transform[0]))])
 
 
 def plot_mods(times, data,carrier,modulated):
@@ -106,12 +116,13 @@ def plot_mods(times, data,carrier,modulated):
 
 def fm_test(time, Ts, wc, kf, A, signal=None, data_fn=None):
     """
-    data_fn: function for data signal
     time: length of signal
     Ts: discrete time sample interval
     wc: carrier frequency
     kf: hertz/volt variation from carrier frequency
     A: amplitude of output signal
+    signal: data signal
+    data_fn: function for data signal
     """
     times = np.arange(0,time,Ts)
     carrier = np.sin(np.multiply(times,2*np.pi*wc))
@@ -130,13 +141,14 @@ def fm_test(time, Ts, wc, kf, A, signal=None, data_fn=None):
 
 def am_test(time, Ts, wc, signal=None, data_fn=None):
     """
-    data_fn: function for data signal (must take array)
     time: length of signal
     Ts: discrete time sample interval
     wc: carrier frequency
+    signal: data signal
+    data_fn: function for data signal (must take array)
     """
     times = np.arange(0,time,Ts)
-    carrier = np.cos(np.multiply(times,2*np.pi*wc))
+    carrier = np.sin(np.multiply(times,2*np.pi*wc))
     if data_fn:
         fn = np.vectorize(data_fn)
         signal = fn(times)
@@ -150,6 +162,7 @@ def view_freq(signal, Ts):
     signal: signal vector to be plotted
     Ts: discrete time sample interval
     """
+    signal = np.array(signal)
     n = len(signal) # length of the signal
     frq = np.fft.fftfreq(signal.size, Ts)
 
@@ -158,7 +171,6 @@ def view_freq(signal, Ts):
 
 
 if __name__ == '__main__':
-    times = np.arange(0,10,0.01)
-    signal = np.sin(times)
-    Main(0.01, am_test(10, 0.01, 3, signal=signal)).run()
+    main = Main(0.01)
+    main.run()
     # Main(0.01, fm_test(10, 0.01, 3, 2, 1, signal=signal)).run()

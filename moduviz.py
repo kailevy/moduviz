@@ -28,7 +28,7 @@ def fm_test(data_fn, time, step, wc, kf, A):
     """
     data_fn: function for data signal
     time: length of signal
-    step: discrete time sample rate
+    step: discrete time sample interval
     wc: carrier frequency
     kf: hertz/volt variation from carrier frequency
     A: amplitude of output signal
@@ -48,7 +48,7 @@ def am_test(data_fn, time, step, wc):
     """
     data_fn: function for data signal (must take array)
     time: length of signal
-    step: discrete time sample rate
+    step: discrete time sample interval
     wc: carrier frequency
     """
     fn = np.vectorize(data_fn)
@@ -58,6 +58,23 @@ def am_test(data_fn, time, step, wc):
 
     return times, fn(times), carrier, am
 
+def view_freq(signal, step):
+    """
+    signal: signal vector to be plotted
+    step: diiscrete time sample interval
+    """
+    n = len(signal) # length of the signal
+    frq = np.fft.fftfreq(signal.size, step)
+
+    Y = np.fft.fft(signal)/n # fft computing and normalization
+
+    plt.stem(frq,np.abs(Y),'r') # plotting the spectrum
+    plt.xlabel('Freq (Hz)')
+    plt.ylabel('|Y(freq)|')
+    plt.show()
+
+
 if __name__ == '__main__':
-    plot_mods(*am_test(np.sin, 10, 0.001, 3))
-    plot_mods(*fm_test(np.sin, 10, 0.001, 3, 2, 1))
+    view_freq(am_test(np.sin, 10, 0.01, 3)[2], 0.01)
+    # plot_mods(*am_test(np.sin, 10, 0.001, 3))
+    # plot_mods(*fm_test(np.sin, 10, 0.001, 3, 2, 1))

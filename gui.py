@@ -26,6 +26,7 @@ class MainWidget(Widget):
         super(MainWidget, self).__init__(*args, **kwargs)
 
         self.callback = callback
+        self.is_fm = True
 
         x = y = 300
         points = []
@@ -53,11 +54,23 @@ class MainWidget(Widget):
         btn.bind(on_release=lambda btn: self.dropdown.select(btn.text))
         self.dropdown.add_widget(btn)
 
-        self.mainbutton = Button(text='Choose signal', size_hint=(None, None), size=[100,100], pos=[self.size[0]-100,100])
+        self.am_button = Button(text='Frequency Modulation (FM)', size=[100,100], pos=[self.size[0]-100,100])
+        self.am_button.bind(on_release=lambda btn: self.set_am_fm(self.am_button.text))
+        self.add_widget(self.am_button)
+
+        self.mainbutton = Button(text='Choose signal', size_hint=(None, None), size=[100,100], pos=[self.size[0]-100,200])
         self.mainbutton.bind(on_release=self.dropdown.open)
         self.dropdown.bind(on_select=self.dropdown_select)
 
         self.add_widget(self.mainbutton)
+
+    def set_am_fm(self, text):
+        if text[0]=='F':
+            setattr(self.am_button, 'text', 'Amplitude Modulation (AM)')
+            self.is_fm = False
+        else:
+            setattr(self.am_button, 'text', 'Frequency Modulation (FM)')
+            self.is_fm = True
     
     def dropdown_select(self, instance, x):
         setattr(self.mainbutton, 'text', x)
@@ -81,7 +94,7 @@ class MainWidget(Widget):
         self.s.set_data(data)
 
     def submit(self, instance):
-        self.callback(self.s.data)
+        self.callback(self.s.data, self.is_fm)
 
 class SignalDraw(Widget):
 
@@ -176,11 +189,12 @@ class SignalDraw(Widget):
 class Main(App):
 
     def build(self):
-        size = [800,600]
-        return MainWidget(callback=self.thing, size=size)
+        size = [800,300]
+        return MainWidget(callback=self.thing, size=size, pos=[0,0])
 
-    def thing(self, data):
-        print(data)
+    def thing(self, data, is_fm):
+        print(len(data))
+        print(is_fm)
 
 if __name__ == '__main__':
     Main().run()

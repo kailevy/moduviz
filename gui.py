@@ -81,7 +81,7 @@ class MainWidget(Widget):
         self.s.set_data(data)
 
     def submit(self, instance):
-        self.callback(data)
+        self.callback(self.s.data)
 
 class SignalDraw(Widget):
 
@@ -115,6 +115,18 @@ class SignalDraw(Widget):
             ps.extend([50+i/float(len(self.data))*(self.size[0]-200), self.size[1]/2*(1+0.9*self.data[i])])
         self.points = ps
         self.line.points = ps
+
+    def compute_data(self):
+        data = []
+        i = 1
+        while i<len(self.points):
+            data.append((2*self.points[i]/self.size[1]-1)/0.9)
+            i+=2
+        mx = max(max(data), math.fabs(min(data)))
+        if mx>1:
+            for i in range(len(data)):
+                data[i] = data[i]/mx
+        self.data = data
 
     def on_touch_down(self, touch):
         self.previous_touch = touch
@@ -156,19 +168,19 @@ class SignalDraw(Widget):
                 self.line.points = self.points
                 self.previous_point = self.current_point
                 self.previous_value = current_value
+                self.compute_data()
                 return True
             return super(SignalDraw, self).on_touch_move(touch)
 
 
 class Main(App):
 
-    def __init__(self, callback):
-        super(Main, self.)
-        self.callback = callback
-
     def build(self):
         size = [800,600]
-        return MainWidget(size=size)
+        return MainWidget(callback=self.thing, size=size)
+
+    def thing(self, data):
+        print(data)
 
 if __name__ == '__main__':
     Main().run()

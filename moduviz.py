@@ -76,7 +76,7 @@ class Main(App):
 
     def modulate(self, signal, mod, wc):
         if mod:
-            return fm_test(10, self.Ts, wc, 2, 1, signal=signal)
+            return fm_test(10, self.Ts, wc, wc/2, 1, signal=signal)
         else:
             return am_test(10, self.Ts, wc, signal=signal)
 
@@ -135,7 +135,7 @@ def fm_test(time, Ts, wc, kf, A, signal=None, data_fn=None):
     for i,t in enumerate(times):
         integral.append(integral[-1] + Ts*signal[i])
 
-    fm = np.multiply(A,np.cos(np.multiply(np.add(np.multiply(times,wc),np.multiply(integral[1:],kf)),2*np.pi)))
+    fm = np.multiply(A,np.cos(np.add(np.multiply(times,wc),np.multiply(integral[1:],kf))))
 
     return times, signal, carrier, fm
 

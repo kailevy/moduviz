@@ -1,14 +1,3 @@
-'''
-Bezier Example
-==============
-
-This example shows a closed Bezier curve computed from a polygon. You
-should see a purple polygon, a red bezier curve computed from the polygon,
-and two sliders. You can drag points on the polygon to recompute the curve.
-The two sliders control the dash length of the dashed lines making up the two
-shapes.
-
-'''
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
@@ -39,7 +28,7 @@ class MainWidget(Widget):
         self.b = Button(text='Submit', size=[100,100], pos=[self.size[0]-100,0])
         self.b.bind(on_press=self.submit)
         self.add_widget(self.b)
-        
+
         self.dropdown = DropDown()
 
         btn = Button(text='Sine', size_hint_y=None, height=44)
@@ -64,6 +53,9 @@ class MainWidget(Widget):
 
         self.add_widget(self.mainbutton)
 
+        self.slider = Slider(min=1, max=30, value=3*math.pi, pos=[self.size[0]-100,300])
+        self.add_widget(self.slider)
+
     def set_am_fm(self, text):
         if text[0]=='F':
             setattr(self.am_button, 'text', 'Amplitude Modulation (AM)')
@@ -71,7 +63,7 @@ class MainWidget(Widget):
         else:
             setattr(self.am_button, 'text', 'Frequency Modulation (FM)')
             self.is_fm = True
-    
+
     def dropdown_select(self, instance, x):
         setattr(self.mainbutton, 'text', x)
 

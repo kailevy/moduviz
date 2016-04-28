@@ -74,18 +74,18 @@ class Main(App):
         biggest_box = BiggerBox(big_box, self.interactive, 'vertical')
         return biggest_box
 
-    def modulate(self, signal, mod):
+    def modulate(self, signal, mod, wc):
         if mod:
-            return fm_test(10, self.Ts, 3, 2, 1, signal=signal)
+            return fm_test(10, self.Ts, wc, 2, 1, signal=signal)
         else:
-            return am_test(10, self.Ts, 3, signal=signal)
+            return am_test(10, self.Ts, wc, signal=signal)
 
     def visualize(self, signal, mod):
         """
         signal: data signal
         mod: am/fm (fm=1, am=0)
         """
-        signal = self.modulate(signal, mod)
+        signal = self.modulate(signal, mod, self.interactive.slider.value)
         for i in range(3):
             select = [(signal[0][x], signal[i+1][x]) for x in range(len(signal[0]))]
             self.time.graph_points(i,select)
@@ -125,7 +125,7 @@ def fm_test(time, Ts, wc, kf, A, signal=None, data_fn=None):
     data_fn: function for data signal
     """
     times = np.arange(0,time,Ts)
-    carrier = np.sin(np.multiply(times,2*np.pi*wc))
+    carrier = np.sin(np.multiply(times,wc))
     integral = [0]
     if data_fn:
         fn = np.vectorize(data_fn)
@@ -148,7 +148,7 @@ def am_test(time, Ts, wc, signal=None, data_fn=None):
     data_fn: function for data signal (must take array)
     """
     times = np.arange(0,time,Ts)
-    carrier = np.sin(np.multiply(times,2*np.pi*wc))
+    carrier = np.sin(np.multiply(times,wc))
     if data_fn:
         fn = np.vectorize(data_fn)
         signal = fn(times)
